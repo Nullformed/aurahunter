@@ -7,6 +7,7 @@ import {createInjectedSVG} from '../../core/logic/InjectedSVG';
 import * as Preloading from '../../core/logic/Preloading';
 import {IVector, Vector} from '../../core/logic/Vector';
 import {GraphicsConfig} from '../../../client-data/Graphics';
+import {meter2px} from "../../../client-data/BasicConfig";
 import {animateAction} from './AnimateAction';
 import {StatusEffect} from './StatusEffect';
 import {Animation} from '../../animations/logic/Animation';
@@ -45,6 +46,7 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
     static variants: ISvgContainer[] = [];
     static svg: Texture;
     static craftingIndicator: ISvgContainer = {svg: undefined};
+    static damageAura: ISvgContainer = {svg: undefined};
     static hitAnimationFrameDuration: number = GraphicsConfig.character.actionAnimation.backendTicks;
 
 
@@ -160,6 +162,13 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
     initShape(svg: Texture, x: number, y: number, size: number, rotation: number) {
         const group = new Container();
         group.position.set(x, y);
+
+        group.addChild(createInjectedSVG(
+            Character.damageAura.svg,
+            0,
+            0,
+            meter2px(GraphicsConfig.character.damageAuraRadiusMeters),
+        ));
 
         this.actualShape = createNamedContainer('actualShape');
         this.actualShape.addChild(super.initShape(svg, 0, 0, size, rotation));
@@ -510,3 +519,9 @@ Preloading.registerGameObjectSVG(
     Character.craftingIndicator,
     GraphicsConfig.character.craftingIndicator.file,
     GraphicsConfig.character.craftingIndicator.size);
+
+// noinspection JSIgnoredPromiseFromCall
+Preloading.registerGameObjectSVG(
+    Character.damageAura,
+    GraphicsConfig.character.damageAuraFile,
+    meter2px(GraphicsConfig.character.damageAuraRadiusMeters));

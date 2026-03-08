@@ -1,11 +1,29 @@
 package player
 
 import (
+	"log"
+
 	"github.com/trichner/berryhunter/pkg/berryhunter/model"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model/vitals"
 )
 
 func (p *player) Update(dt float32) {
+	auraCollisions := p.damageAura.Collisions()
+	for c := range auraCollisions {
+		usr := c.Shape().UserData
+		if usr == nil {
+			log.Printf("Missing UserData!")
+			continue
+		}
+
+		r, ok := usr.(model.Interacter)
+		if !ok {
+			log.Printf("Non conformant UserData: %T", usr)
+			continue
+		}
+		r.PlayerTouches(p, p.config.DamageAuraDamageFraction)
+	}
+
 	// update time based tings
 
 	// action
@@ -24,48 +42,18 @@ func (p *player) Update(dt float32) {
 
 func (p *player) updateVitalSigns(dt float32) {
 	vitalSigns := p.VitalSigns()
-
 	c := p.config
 
-	// satiety
-	s := vitalSigns.Satiety
-	satietyFraction := c.SatietyLossTickFraction
-	vitalSigns.Satiety = s.SubFraction(satietyFraction)
+	// Hunger and cold are disabled: keep both vital signs maxed to prevent
+	// starving/freezing damage and related status effects.
+	vitalSigns.Satiety = vitals.Max
+	vitalSigns.BodyTemperature = vitals.Max
 
-	// Are we both starving and freezing?
-	if vitalSigns.BodyTemperature <= 0 && vitalSigns.Satiety.Fraction() <= 0 {
-		p.addHealthFraction(-c.FreezingStarveDamageTickFraction)
-		return
-	}
-
-	// are we freezing?
-	if vitalSigns.BodyTemperature <= 0 {
-		healthFraction := c.FreezingDamageTickFraction
-		p.addHealthFraction(-healthFraction)
-		p.statusEffects.Add(model.StatusEffectFreezing)
-		return
-	}
-
-	// heal if satiety and temperature are high enough
-	if vitalSigns.Satiety.Fraction() > c.HealthGainSatietyThreshold &&
-		vitalSigns.BodyTemperature.Fraction() > c.HealthGainTemperatureThreshold {
-
-		if vitalSigns.Health != vitals.Max {
-
-			healthFraction := c.HealthGainTick
-			p.addHealthFraction(healthFraction)
-
-			p.statusEffects.Add(model.StatusEffectRegenerating)
-
-			s := vitalSigns.Satiety
-			satietyFraction := c.HealthGainSatietyLossTickFraction
-			vitalSigns.Satiety = s.SubFraction(satietyFraction)
-		}
-	} else if vitalSigns.Satiety.Fraction() <= 0 {
-		// are we starving?
-		healthFraction := c.StarveDamageTickFraction
-		p.addHealthFraction(-healthFraction)
-		p.statusEffects.Add(model.StatusEffectStarving)
+	// Keep normal health regeneration behavior.
+	if vitalSigns.Health != vitals.Max {
+		healthFraction := c.HealthGainTick
+		p.addHealthFraction(healthFraction)
+		p.statusEffects.Add(model.StatusEffectRegenerating)
 	}
 }
 

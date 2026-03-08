@@ -63,6 +63,14 @@ func New(g model.Game, c model.Client, name string) model.PlayerEntity {
 	hand.Shape().Group = shapeGroup
 	p.hand = model.Hand{Collider: hand}
 
+	// setup damage aura
+	damageAura := phy.NewCircle(e.Body.Position(), p.config.DamageAuraRadius)
+	damageAura.Shape().IsSensor = true
+	damageAura.Shape().Group = shapeGroup
+	damageAura.Shape().Layer = int(model.LayerNoneCollision)
+	damageAura.Shape().Mask = int(model.LayerPlayerCollision | model.LayerActionCollision)
+	p.damageAura = damageAura
+
 	p.updateHand()
 
 	return p
@@ -80,7 +88,8 @@ type player struct {
 	angle  float32
 	client model.Client
 
-	viewport *phy.Box
+	viewport   *phy.Box
+	damageAura *phy.Circle
 
 	hand      model.Hand
 	inventory items.Inventory
@@ -140,6 +149,10 @@ func (p *player) MobTouches(e model.MobEntity, factors mobs.Factors) {
 	p.takeDamage(factors.DamageFraction, model.StatusEffectDamagedAmbient)
 }
 
+func (p *player) PlayerTouches(other model.PlayerEntity, damageFraction float32) {
+	p.takeDamage(damageFraction, model.StatusEffectDamagedAmbient)
+}
+
 func (p *player) Name() string {
 	return p.name
 }
@@ -149,10 +162,11 @@ func (p *player) Equipment() *items.Equipment {
 }
 
 func (p *player) Bodies() model.Bodies {
-	b := make(model.Bodies, 3)
+	b := make(model.Bodies, 4)
 	b[0] = p.Body
 	b[1] = p.hand.Collider
 	b[2] = p.viewport
+	b[3] = p.damageAura
 	return b
 }
 
@@ -179,6 +193,7 @@ func (p *player) Position() phy.Vec2f {
 func (p *player) SetPosition(v phy.Vec2f) {
 	p.Body.SetPosition(v)
 	p.viewport.SetPosition(v)
+	p.damageAura.SetPosition(v)
 	p.updateHand()
 }
 

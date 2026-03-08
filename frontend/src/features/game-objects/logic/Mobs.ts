@@ -7,6 +7,9 @@ import {StatusEffect} from './StatusEffect';
 import {IGame} from '../../core/logic/IGame';
 import {GameSetupEvent} from '../../core/logic/Events';
 import * as PIXI from 'pixi.js';
+import {createInjectedSVG} from "../../core/logic/InjectedSVG";
+import {meter2px} from "../../../client-data/BasicConfig";
+import {ISvgContainer} from "../../core/logic/ISvgContainer";
 import './MobJuice';
 
 let Game: IGame = null;
@@ -30,7 +33,13 @@ function file(mob: keyof typeof GraphicsConfig.mobs) {
     return GraphicsConfig.mobs[mob].file;
 }
 
+function damageAuraRadius(mob: keyof typeof GraphicsConfig.mobs) {
+    return GraphicsConfig.mobs[mob].damageAuraRadiusMeters || 0;
+}
+
 export abstract class Mob extends GameObject {
+    static damageAura: ISvgContainer = {svg: undefined};
+
     protected constructor(
         id: number,
         gameLayer: PIXI.Container,
@@ -38,9 +47,16 @@ export abstract class Mob extends GameObject {
         y: number,
         size: number,
         svg: PIXI.Texture,
+        damageAuraRadiusMeters: number,
         anchor?: IVector
     ) {
         super(id, gameLayer, x, y, size, 0, svg, anchor);
+        if (damageAuraRadiusMeters > 0) {
+            this.shape.addChildAt(
+                createInjectedSVG(Mob.damageAura.svg, 0, 0, meter2px(damageAuraRadiusMeters)),
+                0,
+            );
+        }
         this.isMovable = true;
         this.visibleOnMinimap = false;
     }
@@ -68,7 +84,8 @@ export class Dodo extends Mob {
     constructor(id: number, x: number, y: number) {
         super(id, Game.layers.mobs.dodo, x, y,
             randomInt(minSize('dodo'), maxSize('dodo')),
-            Dodo.svg);
+            Dodo.svg,
+            damageAuraRadius('dodo'));
     }
 
     protected override createStatusEffects() {
@@ -96,7 +113,8 @@ export class SaberToothCat extends Mob {
     constructor(id: number, x: number, y: number) {
         super(id, Game.layers.mobs.saberToothCat, x, y,
             randomInt(minSize('saberToothCat'), maxSize('saberToothCat')),
-            SaberToothCat.svg);
+            SaberToothCat.svg,
+            damageAuraRadius('saberToothCat'));
 
     }
 
@@ -126,7 +144,9 @@ export class Mammoth extends Mob {
     constructor(id: number, x: number, y: number) {
         super(id, Game.layers.mobs.mammoth, x, y,
             randomInt(minSize('mammoth'), maxSize('mammoth')),
-            Mammoth.svg, anchor('mammoth'));
+            Mammoth.svg,
+            damageAuraRadius('mammoth'),
+            anchor('mammoth'));
     }
 
     protected override createStatusEffects() {
@@ -154,7 +174,9 @@ export class AngryMammoth extends Mob {
     constructor(id: number, x: number, y: number) {
         super(id, Game.layers.bossMobs, x, y,
             randomInt(minSize('angryMammoth'), maxSize('angryMammoth')),
-            AngryMammoth.svg, anchor('angryMammoth'));
+            AngryMammoth.svg,
+            damageAuraRadius('angryMammoth'),
+            anchor('angryMammoth'));
     }
 
     protected override createStatusEffects() {
@@ -175,3 +197,6 @@ export class AngryMammoth extends Mob {
 
 // noinspection JSIgnoredPromiseFromCall
 Preloading.registerGameObjectSVG(AngryMammoth, file('angryMammoth'), maxSize('angryMammoth'));
+
+// noinspection JSIgnoredPromiseFromCall
+Preloading.registerGameObjectSVG(Mob.damageAura, GraphicsConfig.character.damageAuraFile, meter2px(2.1));

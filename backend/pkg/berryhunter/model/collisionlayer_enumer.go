@@ -24,6 +24,8 @@ const (
 	_CollisionLayerLowerName_6 = "layermobstaticcollision"
 	_CollisionLayerName_7      = "LayerPlayerCollision"
 	_CollisionLayerLowerName_7 = "layerplayercollision"
+	_CollisionLayerName_8      = "LayerPlaceableCollision"
+	_CollisionLayerLowerName_8 = "layerplaceablecollision"
 )
 
 var (
@@ -35,6 +37,7 @@ var (
 	_CollisionLayerIndex_5 = [...]uint8{0, 22}
 	_CollisionLayerIndex_6 = [...]uint8{0, 23}
 	_CollisionLayerIndex_7 = [...]uint8{0, 20}
+	_CollisionLayerIndex_8 = [...]uint8{0, 23}
 )
 
 func (i CollisionLayer) String() string {
@@ -55,6 +58,8 @@ func (i CollisionLayer) String() string {
 		return _CollisionLayerName_6
 	case i == 256:
 		return _CollisionLayerName_7
+	case i == 512:
+		return _CollisionLayerName_8
 	default:
 		return fmt.Sprintf("CollisionLayer(%d)", i)
 	}
@@ -74,9 +79,10 @@ func _CollisionLayerNoOp() {
 	_ = x[LayerViewportCollision-(64)]
 	_ = x[LayerMobStaticCollision-(128)]
 	_ = x[LayerPlayerCollision-(256)]
+	_ = x[LayerPlaceableCollision-(512)]
 }
 
-var _CollisionLayerValues = []CollisionLayer{LayerNoneCollision, LayerPlayerStaticCollision, LayerActionCollision, LayerWeaponCollision, LayerRessourceCollision, LayerHeatCollision, LayerBorderCollision, LayerViewportCollision, LayerMobStaticCollision, LayerPlayerCollision}
+var _CollisionLayerValues = []CollisionLayer{LayerNoneCollision, LayerPlayerStaticCollision, LayerActionCollision, LayerWeaponCollision, LayerRessourceCollision, LayerHeatCollision, LayerBorderCollision, LayerViewportCollision, LayerMobStaticCollision, LayerPlayerCollision, LayerPlaceableCollision}
 
 var _CollisionLayerNameToValueMap = map[string]CollisionLayer{
 	_CollisionLayerName_0[0:18]:       LayerNoneCollision,
@@ -99,6 +105,8 @@ var _CollisionLayerNameToValueMap = map[string]CollisionLayer{
 	_CollisionLayerLowerName_6[0:23]:  LayerMobStaticCollision,
 	_CollisionLayerName_7[0:20]:       LayerPlayerCollision,
 	_CollisionLayerLowerName_7[0:20]:  LayerPlayerCollision,
+	_CollisionLayerName_8[0:23]:       LayerPlaceableCollision,
+	_CollisionLayerLowerName_8[0:23]:  LayerPlaceableCollision,
 }
 
 var _CollisionLayerNames = []string{
@@ -112,6 +120,7 @@ var _CollisionLayerNames = []string{
 	_CollisionLayerName_5[0:22],
 	_CollisionLayerName_6[0:23],
 	_CollisionLayerName_7[0:20],
+	_CollisionLayerName_8[0:23],
 }
 
 // CollisionLayerString retrieves an enum value from the enum constants string name.

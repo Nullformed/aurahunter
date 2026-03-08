@@ -17,7 +17,9 @@
       "healthGainTemperatureThreshold": 0.5,
       "healthGainTick": 0.00033,
       "healthGainSatietyLossTickFraction": 0.0,
-      "walkingSpeedPerTick": 0.055
+      "walkingSpeedPerTick": 0.055,
+      "damageAuraRadius": 0.6,
+      "damageAuraDamageFraction": 0.00167
     }
   }
 }
