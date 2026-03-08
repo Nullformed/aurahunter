@@ -141,8 +141,20 @@ func (rcv *Mob) Aabb(obj *AABB) *AABB {
 	return nil
 }
 
-func (rcv *Mob) MobId() uint16 {
+func (rcv *Mob) Health() uint32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(18))
+	if o != 0 {
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *Mob) MutateHealth(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(18, n)
+}
+
+func (rcv *Mob) MobId() uint16 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(20))
 	if o != 0 {
 		return rcv._tab.GetUint16(o + rcv._tab.Pos)
 	}
@@ -150,11 +162,11 @@ func (rcv *Mob) MobId() uint16 {
 }
 
 func (rcv *Mob) MutateMobId(n uint16) bool {
-	return rcv._tab.MutateUint16Slot(18, n)
+	return rcv._tab.MutateUint16Slot(20, n)
 }
 
 func MobStart(builder *flatbuffers.Builder) {
-	builder.StartObject(8)
+	builder.StartObject(9)
 }
 func MobAddId(builder *flatbuffers.Builder, id uint64) {
 	builder.PrependUint64Slot(0, id, 0)
@@ -180,8 +192,11 @@ func MobAddRotation(builder *flatbuffers.Builder, rotation float32) {
 func MobAddAabb(builder *flatbuffers.Builder, aabb flatbuffers.UOffsetT) {
 	builder.PrependStructSlot(6, flatbuffers.UOffsetT(aabb), 0)
 }
+func MobAddHealth(builder *flatbuffers.Builder, health uint32) {
+	builder.PrependUint32Slot(7, health, 0)
+}
 func MobAddMobId(builder *flatbuffers.Builder, mobId uint16) {
-	builder.PrependUint16Slot(7, mobId, 0)
+	builder.PrependUint16Slot(8, mobId, 0)
 }
 func MobEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

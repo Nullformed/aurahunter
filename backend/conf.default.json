@@ -27,7 +27,7 @@
       "healthGainSatietyLossTickFraction": 0.0,
       "walkingSpeedPerTick": 0.055,
       "damageAuraRadius": 1,
-      "damageAuraDamageFraction": 0.01
+      "damageAuraDamageFraction": 0.1
     }
   }
 }

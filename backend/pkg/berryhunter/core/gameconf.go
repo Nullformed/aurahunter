@@ -31,7 +31,7 @@ func Config(conf *cfg.Config) Configuration {
 			g.PlayerConfig.DamageAuraRadius = 0.6
 		}
 		if g.PlayerConfig.DamageAuraDamageFraction <= 0 {
-			g.PlayerConfig.DamageAuraDamageFraction = 0.00167
+			g.PlayerConfig.DamageAuraDamageFraction = 0.01
 		}
 
 		if conf.Chieftain.Addr != "" {

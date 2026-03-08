@@ -18,6 +18,7 @@ func MobEntityFlatbufMarshal(m model.MobEntity, builder *flatbuffers.Builder) fl
 
 	aabb := AabbMarshalFlatbuf(m.AABB(), builder)
 	BerryhunterApi.MobAddAabb(builder, aabb)
+	BerryhunterApi.MobAddHealth(builder, m.Health().UInt32())
 
 	pos := Vec2fMarshalFlatbuf(builder, m.Position())
 	BerryhunterApi.MobAddPos(builder, pos)

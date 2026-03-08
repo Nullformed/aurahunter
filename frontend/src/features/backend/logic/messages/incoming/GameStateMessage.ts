@@ -132,6 +132,7 @@ function unmarshalEntity(entity, eType) {
 
     if (eType === BerryhunterApi.AnyEntity.Mob) {
         result.rotation = entity.rotation();
+        result.health = entity.health();
     }
 
     if (eType === BerryhunterApi.AnyEntity.Character) {

@@ -39,6 +39,10 @@ function damageAuraRadius(mob: keyof typeof GraphicsConfig.mobs) {
 
 export abstract class Mob extends GameObject {
     static damageAura: ISvgContainer = {svg: undefined};
+    private static readonly MAX_HEALTH = 0xffffffff;
+
+    protected actualShape: PIXI.Container;
+    private healthFillGroup: PIXI.Container;
 
     protected constructor(
         id: number,
@@ -62,8 +66,20 @@ export abstract class Mob extends GameObject {
                 0,
             );
         }
+        this.initHealthBar();
         this.isMovable = true;
         this.visibleOnMinimap = false;
+    }
+
+    initShape(svg: PIXI.Texture, x: number, y: number, size: number, rotation: number, anchor?: IVector): PIXI.Container {
+        const group = new PIXI.Container();
+        group.position.set(x, y);
+
+        this.actualShape = new PIXI.Container();
+        this.actualShape.addChild(super.initShape(svg, 0, 0, size, rotation, anchor));
+        group.addChild(this.actualShape);
+
+        return group;
     }
 
     setRotation(rotation: number) {
@@ -75,11 +91,50 @@ export abstract class Mob extends GameObject {
         super.setRotation(rotation + Math.PI / 2);
     }
 
+    getRotationShape(): PIXI.Container {
+        return this.actualShape;
+    }
+
+    setHealth(health: number) {
+        const relativeHealth = Math.max(0, Math.min(1, health / Mob.MAX_HEALTH));
+        this.healthFillGroup.scale.x = relativeHealth;
+    }
+
     protected override createStatusEffects() {
         return {
-            Damaged: StatusEffect.forDamaged(this.shape),
-            DamagedAmbient: StatusEffect.forDamagedOverTime(this.shape),
+            Damaged: StatusEffect.forDamaged(this.actualShape),
+            DamagedAmbient: StatusEffect.forDamagedOverTime(this.actualShape),
         };
+    }
+
+    private initHealthBar() {
+        const barWidth = Math.min(160, Math.max(30, this.size * 0.9));
+        const barHeight = Math.max(5, Math.min(10, barWidth * 0.12));
+        const borderWidth = 1;
+
+        const bar = new PIXI.Container();
+        bar.y = -Math.max(30, this.size * 0.9);
+
+        bar.addChild(
+            new PIXI.Graphics()
+                .rect(-barWidth / 2, -barHeight / 2, barWidth, barHeight)
+                .fill({color: 0x000000, alpha: 0.6})
+                .stroke({width: borderWidth, color: 0xffffff, alpha: 0.35}),
+        );
+
+        const innerWidth = barWidth - 2 * borderWidth;
+        const innerHeight = barHeight - 2 * borderWidth;
+        this.healthFillGroup = new PIXI.Container();
+        this.healthFillGroup.position.set(-innerWidth / 2, -innerHeight / 2);
+        this.healthFillGroup.addChild(
+            new PIXI.Graphics()
+                .rect(0, 0, innerWidth, innerHeight)
+                .fill({color: 0xaa3b3b, alpha: 0.9}),
+        );
+        bar.addChild(this.healthFillGroup);
+
+        this.shape.addChild(bar);
+        this.setHealth(Mob.MAX_HEALTH);
     }
 }
 
@@ -95,7 +150,7 @@ export class Dodo extends Mob {
 
     protected override createStatusEffects() {
         return {
-            Damaged: StatusEffect.forDamaged(this.shape,
+            Damaged: StatusEffect.forDamaged(this.actualShape,
                 [{
                     soundId: 'dodoHit',
                     options: {
@@ -104,7 +159,7 @@ export class Dodo extends Mob {
                     },
                     chanceToPlay: 0.3,
                 }]),
-            DamagedAmbient: StatusEffect.forDamagedOverTime(this.shape),
+            DamagedAmbient: StatusEffect.forDamagedOverTime(this.actualShape),
         };
     }
 }
@@ -125,7 +180,7 @@ export class SaberToothCat extends Mob {
 
     protected override createStatusEffects() {
         return {
-            Damaged: StatusEffect.forDamaged(this.shape,
+            Damaged: StatusEffect.forDamaged(this.actualShape,
                 [{
                     soundId: 'saberToothCatHit',
                     options: {
@@ -134,7 +189,7 @@ export class SaberToothCat extends Mob {
                     },
                     chanceToPlay: 0.3,
                 }]),
-            DamagedAmbient: StatusEffect.forDamagedOverTime(this.shape),
+            DamagedAmbient: StatusEffect.forDamagedOverTime(this.actualShape),
         };
     }
 }
@@ -156,7 +211,7 @@ export class Mammoth extends Mob {
 
     protected override createStatusEffects() {
         return {
-            Damaged: StatusEffect.forDamaged(this.shape,
+            Damaged: StatusEffect.forDamaged(this.actualShape,
                 [{
                     soundId: 'mammothHit',
                     options: {
@@ -165,7 +220,7 @@ export class Mammoth extends Mob {
                     },
                     chanceToPlay: 0.3,
                 }]),
-            DamagedAmbient: StatusEffect.forDamagedOverTime(this.shape),
+            DamagedAmbient: StatusEffect.forDamagedOverTime(this.actualShape),
         };
     }
 }
@@ -186,7 +241,7 @@ export class AngryMammoth extends Mob {
 
     protected override createStatusEffects() {
         return {
-            Damaged: StatusEffect.forDamaged(this.shape,
+            Damaged: StatusEffect.forDamaged(this.actualShape,
                 [{
                     soundId: 'mammothHit',
                     options: {
@@ -195,7 +250,7 @@ export class AngryMammoth extends Mob {
                     },
                     chanceToPlay: 0.3,
                 }]),
-            DamagedAmbient: StatusEffect.forDamagedOverTime(this.shape),
+            DamagedAmbient: StatusEffect.forDamagedOverTime(this.actualShape),
         };
     }
 }
