@@ -1,6 +1,5 @@
 import {meter2px} from './BasicConfig';
 import {color, integer} from '../features/common/logic/Types';
-import {requireAll} from '../features/common/logic/Utils';
 
 export const GraphicsConfig = {
 
@@ -28,7 +27,7 @@ export const GraphicsConfig = {
          * SYNCED WITH BACKEND
          */
         size: <number> 30,
-        files: requireAll(require.context('../features/game-objects/assets/characters', false, /\.svg$/)),
+        files: [require('../features/game-objects/assets/characters/player.svg')],
         damageAuraFile: require('../features/game-objects/assets/effects/damageAura.svg'),
         damageAuraRadiusMeters: <number> 1,
         /**
@@ -83,33 +82,31 @@ export const GraphicsConfig = {
             }
     }>{
         dodo: {
-            file: require('../features/game-objects/assets/mobs/dodo.svg'),
+            file: require('../features/game-objects/assets/mobs/boar.svg'),
             minSize: <number> 35,
             maxSize: <number> 45,
             damageAuraRadiusMeters: <number> 0.6,
         },
 
         saberToothCat: {
-            file: require('../features/game-objects/assets/mobs/lion-svgrepo-com.svg'),
+            file: require('../features/game-objects/assets/mobs/lion.svg'),
             minSize: <number> 45,
             maxSize: <number> 60,
             damageAuraRadiusMeters: <number> 1,
         },
 
         mammoth: {
-            file: require('../features/game-objects/assets/mobs/mammoth.svg'),
+            file: require('../features/game-objects/assets/mobs/skeleton.svg'),
             minSize: <number> 85,
             maxSize: <number> 100,
-            damageAuraRadiusMeters: <number> 1,
-            anchor: {x: 0.5, y: 0.4},
+            damageAuraRadiusMeters: <number> 1
         },
 
         angryMammoth: {
-            file: require('../features/game-objects/assets/mobs/angryMammoth.svg'),
-            minSize: <number> 340,
-            maxSize: <number> 340,
-            damageAuraRadiusMeters: <number> 3,
-            anchor: {x: 0.5, y: 0.4},
+            file: require('../features/game-objects/assets/mobs/demon.svg'),
+            minSize: <number> 180,
+            maxSize: <number> 220,
+            damageAuraRadiusMeters: <number> 3
         },
     },
 

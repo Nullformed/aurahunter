@@ -220,14 +220,7 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
         slotGroup.position.set(-this.size * 0.2, 0);
         slotGroup.rotation = Math.PI / 2;
 
-        const handShape = new Graphics()
-            .circle(0, 0, this.size * 0.2)
-            .fill(GraphicsConfig.character.hands.fillColor)
-            .stroke({
-                width: 0.212 * 0.6 /* relative to size */,
-                color: GraphicsConfig.character.hands.lineColor,
-            });
-        group.addChild(handShape);
+        // Intentionally no visible fist shape; keep slot/transform for held item visuals.
 
         group['originalTranslation'] = Vector.clone(group.position);
         return {
