@@ -7,6 +7,7 @@ import (
 
 	"github.com/EngoEngine/ecs"
 	"github.com/google/flatbuffers/go"
+	"github.com/google/uuid"
 	"github.com/trichner/berryhunter/pkg/berryhunter/codec"
 	"github.com/trichner/berryhunter/pkg/berryhunter/minions"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model"
@@ -31,14 +32,19 @@ func (s stringSet) contains(str string) bool {
 }
 
 type ConnectionStateSystem struct {
-	spectators []model.Spectator
-	players    []model.PlayerEntity
-	game       model.Game
-	names      stringSet
+	spectators          []model.Spectator
+	players             []model.PlayerEntity
+	game                model.Game
+	names               stringSet
+	progressionByClient map[uuid.UUID]model.PlayerProgression
 }
 
 func NewConnectionStateSystem(g model.Game) *ConnectionStateSystem {
-	return &ConnectionStateSystem{game: g, names: stringSet{}}
+	return &ConnectionStateSystem{
+		game:                g,
+		names:               stringSet{},
+		progressionByClient: map[uuid.UUID]model.PlayerProgression{},
+	}
 }
 
 func (*ConnectionStateSystem) Priority() int {
@@ -79,6 +85,9 @@ func (s *ConnectionStateSystem) Update(dt float32) {
 			sendAcceptMessage(client)
 
 			p := player.New(s.game, client, name)
+			if progression, ok := s.progressionByClient[client.UUID()]; ok {
+				p.SetProgression(progression)
+			}
 
 			// spawn the player at a random location
 			rmax := s.game.Radius() * 0.8
@@ -96,6 +105,7 @@ func (s *ConnectionStateSystem) Update(dt float32) {
 			log.Printf("💀 '%s' died.", p.Name())
 			sendObituaryMessage(p.Client())
 			deathspot := p.Position()
+			s.progressionByClient[p.Client().UUID()] = p.Progression()
 
 			// remove the player from the game
 			s.game.RemoveEntity(p.Basic())

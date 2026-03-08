@@ -63,6 +63,10 @@ type PlayerConfig struct {
 
 	WalkingSpeedPerTick float32
 
-	DamageAuraRadius         float32
-	DamageAuraDamageFraction float32
+	DamageAuraRadius            float32
+	DamageAuraDamageFraction    float32
+	DamageAuraLevelGainFraction float32
+
+	LevelUpXPBase         uint32
+	LevelUpXPGrowthFactor float32
 }

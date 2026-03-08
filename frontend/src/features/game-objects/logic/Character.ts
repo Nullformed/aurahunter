@@ -52,6 +52,7 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
 
     name: string;
     nameElement: Text;
+    levelElement: Text;
     isPlayerCharacter: boolean;
     movementSpeed: number;
 
@@ -115,6 +116,7 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
         this.setRotation(Math.PI / 2);
 
         this.createName();
+        this.setLevel(1);
 
         this.followGroups = [];
 
@@ -253,6 +255,31 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
         this.shape.addChild(text);
         text.position.set(0, -1.3 * this.size);
         this.nameElement = text;
+    }
+
+    setLevel(level: number) {
+        if (!isDefined(level) || level < 1) {
+            level = 1;
+        }
+
+        if (!isDefined(this.levelElement)) {
+            const text = new Text({
+                text: String(level),
+                style: TextDisplay.style({
+                    fill: '#E9D5FF',
+                    stroke: {color: '#2E1065', width: 3},
+                    fontSize: 20,
+                    fontWeight: '700',
+                }),
+            });
+            text.anchor.set(0.5, 0.5);
+            this.shape.addChild(text);
+            text.position.set(0.72 * this.size, 0.72 * this.size);
+            this.levelElement = text;
+            return;
+        }
+
+        this.levelElement.text = String(level);
     }
 
     createMinimapIcon() {

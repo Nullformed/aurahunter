@@ -128,15 +128,8 @@ export class VitalSigns {
                 break;
         }
 
-        const relativeSatiety = this.currentValues.satiety / VitalSigns.MAXIMUM_VALUES.satiety;
-        if (this.showIndicatorBelowThreshold(relativeSatiety, 'hunger')) {
-            displayedStatusEffects.push(StatusEffect.Starving);
-        }
-
-        const relativeBodyHeat = this.currentValues.bodyHeat / VitalSigns.MAXIMUM_VALUES.bodyHeat;
-        if (this.showIndicatorBelowThreshold(relativeBodyHeat, 'coldness')) {
-            displayedStatusEffects.push(StatusEffect.Freezing);
-        }
+        // Hunger/cold overlays are intentionally disabled. The second HUD bar is
+        // repurposed to show level progress, and body temperature gameplay is off.
 
         this.overlayManager.onUpdateFromBackend(displayedStatusEffects);
 

@@ -97,8 +97,8 @@ export const GraphicsConfig = {
 
         mammoth: {
             file: require('../features/game-objects/assets/mobs/skeleton.svg'),
-            minSize: <number> 85,
-            maxSize: <number> 100,
+            minSize: <number> 60,
+            maxSize: <number> 80,
             damageAuraRadiusMeters: <number> 1
         },
 

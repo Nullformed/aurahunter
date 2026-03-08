@@ -31,6 +31,7 @@ type Factors struct {
 	DeltaPhi                float32
 	TurnRate                float32
 	StructureDamageFraction float32
+	Experience              uint32
 }
 
 type Body struct {
@@ -84,6 +85,7 @@ type mobDefinition struct {
 		Speed                   float32 `json:"speed"`
 		DeltaPhi                float32 `json:"deltaPhi"`
 		TurnRate                float32 `json:"turnRate"`
+		Experience              uint32  `json:"experience"`
 	} `json:"factors"`
 
 	Drops []struct {
@@ -136,6 +138,7 @@ func (m *mobDefinition) mapToMobDefinition(r items.Registry) (*MobDefinition, er
 			Speed:                   m.Factors.Speed,
 			DeltaPhi:                m.Factors.DeltaPhi,
 			TurnRate:                m.Factors.TurnRate,
+			Experience:              m.Factors.Experience,
 		},
 		Drops: make(Drops, 0, 1),
 		Body: Body{

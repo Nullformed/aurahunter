@@ -23,6 +23,11 @@ type Stats struct {
 	BirthTick uint64
 }
 
+type PlayerProgression struct {
+	Level      uint32
+	Experience uint64
+}
+
 type Players []PlayerEntity
 
 type PlayerEntity interface {
@@ -50,6 +55,11 @@ type PlayerEntity interface {
 
 	Config() *cfg.PlayerConfig
 	Stats() *Stats
+	AddExperience(xp uint64)
+	Progression() PlayerProgression
+	SetProgression(progression PlayerProgression)
+	DamageAuraDamageFraction() float32
+	LevelProgressFraction() float32
 }
 
 type BasicEntities map[uint64]ecs.BasicEntity

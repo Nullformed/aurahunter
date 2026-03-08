@@ -138,6 +138,10 @@ export class EntityManager {
                         break;
                 }
             }
+
+            if (isDefined(entity.level) && isFunction(character['setLevel'])) {
+                character['setLevel'](entity.level);
+            }
         }
 
         if (Array.isArray(entity.statusEffects)) {

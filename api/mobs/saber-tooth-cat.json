@@ -5,6 +5,7 @@
   "factors": {
     "vulnerability": 0.833,
     "damageFraction": 0.004,
+    "experience": 25,
     "speed": 0.5,
     "deltaPhi": 0.1,
     "turnRate": 0.1

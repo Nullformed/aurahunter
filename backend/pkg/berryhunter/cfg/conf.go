@@ -39,9 +39,12 @@ type Config struct {
 			HealthGainSatietyLossTickFraction float32 `json:"healthGainSatietyLossTickFraction"`
 
 			//
-			WalkingSpeedPerTick      float32 `json:"walkingSpeedPerTick"`
-			DamageAuraRadius         float32 `json:"damageAuraRadius"`
-			DamageAuraDamageFraction float32 `json:"damageAuraDamageFraction"`
+			WalkingSpeedPerTick         float32 `json:"walkingSpeedPerTick"`
+			DamageAuraRadius            float32 `json:"damageAuraRadius"`
+			DamageAuraDamageFraction    float32 `json:"damageAuraDamageFraction"`
+			DamageAuraLevelGainFraction float32 `json:"damageAuraLevelGainFraction"`
+			LevelUpXPBase               uint32  `json:"levelUpXPBase"`
+			LevelUpXPGrowthFactor       float32 `json:"levelUpXPGrowthFactor"`
 		} `json:"player"`
 	} `json:"game"`
 }

@@ -78,10 +78,13 @@ export class Player {
 
         let newVitalSigns: VitalSignValues = {
             health: entity.health,
-            satiety: entity.satiety,
-            bodyHeat: entity.bodyHeat
+            satiety: Math.round((entity.levelProgress || 0) * VitalSigns.MAXIMUM_VALUES.satiety),
+            bodyHeat: VitalSigns.MAXIMUM_VALUES.bodyHeat
         };
         this.vitalSigns.updateFromBackend(newVitalSigns, damageState);
+        if (isDefined(entity.level)) {
+            this.character.setLevel(entity.level);
+        }
 
         /**
          * Handle Actions

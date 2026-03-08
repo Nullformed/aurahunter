@@ -27,11 +27,23 @@ func Config(conf *cfg.Config) Configuration {
 		g.PlayerConfig.WalkingSpeedPerTick = conf.Game.Player.WalkingSpeedPerTick
 		g.PlayerConfig.DamageAuraRadius = conf.Game.Player.DamageAuraRadius
 		g.PlayerConfig.DamageAuraDamageFraction = conf.Game.Player.DamageAuraDamageFraction
+		g.PlayerConfig.DamageAuraLevelGainFraction = conf.Game.Player.DamageAuraLevelGainFraction
+		g.PlayerConfig.LevelUpXPBase = conf.Game.Player.LevelUpXPBase
+		g.PlayerConfig.LevelUpXPGrowthFactor = conf.Game.Player.LevelUpXPGrowthFactor
 		if g.PlayerConfig.DamageAuraRadius <= 0 {
 			g.PlayerConfig.DamageAuraRadius = 0.6
 		}
 		if g.PlayerConfig.DamageAuraDamageFraction <= 0 {
 			g.PlayerConfig.DamageAuraDamageFraction = 0.01
+		}
+		if g.PlayerConfig.DamageAuraLevelGainFraction <= 0 {
+			g.PlayerConfig.DamageAuraLevelGainFraction = 0.01
+		}
+		if g.PlayerConfig.LevelUpXPBase == 0 {
+			g.PlayerConfig.LevelUpXPBase = 25
+		}
+		if g.PlayerConfig.LevelUpXPGrowthFactor <= 1.0 {
+			g.PlayerConfig.LevelUpXPGrowthFactor = 1.2
 		}
 
 		if conf.Chieftain.Addr != "" {

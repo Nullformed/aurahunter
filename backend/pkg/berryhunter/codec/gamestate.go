@@ -55,6 +55,8 @@ func characterCommonMarshalFlatbuf(builder *flatbuffers.Builder, p model.PlayerE
 	BerryhunterApi.CharacterAddRadius(builder, f32ToU16Px(p.Radius()))
 	BerryhunterApi.CharacterAddRotation(builder, p.Angle())
 	BerryhunterApi.CharacterAddEntityType(builder, BerryhunterApi.EntityType(p.Type()))
+	BerryhunterApi.CharacterAddSatiety(builder, fracToUint32(p.LevelProgressFraction()))
+	BerryhunterApi.CharacterAddBodyTemperature(builder, p.Progression().Level)
 
 	BerryhunterApi.CharacterAddEquipment(builder, equipment)
 }
@@ -97,10 +99,20 @@ func CharacterMarshalFlatbuf(p model.PlayerEntity, builder *flatbuffers.Builder)
 	// other stuffz
 	vs := p.VitalSigns()
 	BerryhunterApi.CharacterAddHealth(builder, vs.Health.UInt32())
-	BerryhunterApi.CharacterAddSatiety(builder, vs.Satiety.UInt32())
-	BerryhunterApi.CharacterAddBodyTemperature(builder, vs.BodyTemperature.UInt32())
+	BerryhunterApi.CharacterAddSatiety(builder, fracToUint32(p.LevelProgressFraction()))
+	BerryhunterApi.CharacterAddBodyTemperature(builder, p.Progression().Level)
 
-	return BerryhunterApi.EntityEnd(builder)
+	return BerryhunterApi.CharacterEnd(builder)
+}
+
+func fracToUint32(f float32) uint32 {
+	if f <= 0 {
+		return 0
+	}
+	if f >= 1 {
+		return ^uint32(0)
+	}
+	return uint32(f * float32(^uint32(0)))
 }
 
 func SpectatorMarshalFlatbuf(b *flatbuffers.Builder, s model.Spectator) flatbuffers.UOffsetT {

@@ -118,6 +118,8 @@ function unmarshalEntity(entity, eType) {
         health: undefined,
         satiety: undefined,
         bodyHeat: undefined,
+        level: undefined,
+        levelProgress: undefined,
         statusEffects: undefined,
     };
 
@@ -154,6 +156,8 @@ function unmarshalEntity(entity, eType) {
         result.health = entity.health();
         result.satiety = entity.satiety();
         result.bodyHeat = entity.bodyTemperature();
+        result.level = entity.bodyTemperature();
+        result.levelProgress = entity.satiety() / 0xffffffff;
 
         result.equipment = [];
         for (let i = 0; i < entity.equipmentLength(); ++i) {

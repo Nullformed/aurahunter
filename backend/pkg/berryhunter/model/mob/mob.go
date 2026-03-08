@@ -111,7 +111,8 @@ type Mob struct {
 	spawnPosition    phy.Vec2f
 	spawnInitialized bool
 
-	statusEffects model.StatusEffects
+	statusEffects    model.StatusEffects
+	deathRewardGiven bool
 }
 
 func (m *Mob) StatusEffects() *model.StatusEffects {
@@ -267,12 +268,7 @@ func (m *Mob) PlayerHitsWith(p model.PlayerEntity, item items.Item) {
 	log.Printf("🎯")
 
 	m.takeDamage(item.Factors.Damage, model.StatusEffectDamaged)
-	// is it dead?
-	if m.health <= 0 {
-		for _, i := range m.definition.Drops {
-			p.Inventory().AddItem(i)
-		}
-	}
+	m.tryGrantKillRewards(p)
 }
 
 func (m *Mob) MobTouches(e model.MobEntity, factors mobs.Factors) {
@@ -285,4 +281,16 @@ func (m *Mob) PlayerTouches(p model.PlayerEntity, damageFraction float32) {
 	log.Printf("👉")
 
 	m.takeDamage(damageFraction, model.StatusEffectDamagedAmbient)
+	m.tryGrantKillRewards(p)
+}
+
+func (m *Mob) tryGrantKillRewards(p model.PlayerEntity) {
+	// is it dead?
+	if m.health <= 0 && !m.deathRewardGiven {
+		m.deathRewardGiven = true
+		for _, i := range m.definition.Drops {
+			p.Inventory().AddItem(i)
+		}
+		p.AddExperience(uint64(m.definition.Factors.Experience))
+	}
 }

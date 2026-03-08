@@ -3,6 +3,7 @@ package player
 import (
 	"github.com/trichner/berryhunter/pkg/berryhunter/items/mobs"
 	"log"
+	"math"
 
 	"github.com/trichner/berryhunter/pkg/api/BerryhunterApi"
 	"github.com/trichner/berryhunter/pkg/berryhunter/cfg"
@@ -28,6 +29,7 @@ func New(g model.Game, c model.Client, name string) model.PlayerEntity {
 		ownedEntitites: model.NewBasicEntities(),
 		config:         &g.Config().PlayerConfig,
 		stats:          model.Stats{BirthTick: g.Ticks()},
+		progression:    model.PlayerProgression{Level: 1, Experience: 0},
 		statusEffects:  model.NewStatusEffects(),
 	}
 
@@ -106,7 +108,8 @@ type player struct {
 	isGod  bool
 	wasGod bool
 
-	stats model.Stats
+	stats       model.Stats
+	progression model.PlayerProgression
 }
 
 func (p *player) StatusEffects() *model.StatusEffects {
@@ -218,6 +221,55 @@ func (p *player) Stats() *model.Stats {
 	return &p.stats
 }
 
+func (p *player) AddExperience(xp uint64) {
+	if xp == 0 {
+		return
+	}
+	p.progression.Experience += xp
+
+	level := p.levelForExperience(p.progression.Experience)
+	if level < 1 {
+		level = 1
+	}
+	p.progression.Level = level
+}
+
+func (p *player) Progression() model.PlayerProgression {
+	return p.progression
+}
+
+func (p *player) SetProgression(progression model.PlayerProgression) {
+	if progression.Level < 1 {
+		progression.Level = 1
+	}
+	p.progression = progression
+}
+
+func (p *player) DamageAuraDamageFraction() float32 {
+	levelBonus := float32(p.progression.Level-1) * p.config.DamageAuraLevelGainFraction
+	return p.config.DamageAuraDamageFraction + levelBonus
+}
+
+func (p *player) LevelProgressFraction() float32 {
+	level := p.progression.Level
+	levelStartXP := p.totalXPForLevel(level)
+	levelEndXP := p.totalXPForLevel(level + 1)
+	if levelEndXP <= levelStartXP {
+		return 1
+	}
+
+	gained := p.progression.Experience - levelStartXP
+	required := levelEndXP - levelStartXP
+	fraction := float32(gained) / float32(required)
+	if fraction < 0 {
+		return 0
+	}
+	if fraction > 1 {
+		return 1
+	}
+	return fraction
+}
+
 func initializePlayerInventory(r items.Registry) (items.Inventory, error) {
 	type startItem struct {
 		name  string
@@ -250,6 +302,53 @@ func initializePlayerInventory(r items.Registry) (items.Inventory, error) {
 func (p *player) startAction(tool items.Item) {
 	p.hand.Item = tool
 	p.hand.Collider.Shape().Mask = int(model.LayerRessourceCollision | model.LayerActionCollision)
+}
+
+func (p *player) experienceForNextLevel(level uint32) uint64 {
+	if level < 1 {
+		level = 1
+	}
+
+	baseXP := float64(p.config.LevelUpXPBase)
+	growth := float64(p.config.LevelUpXPGrowthFactor)
+	if growth <= 1.0 {
+		growth = 1.2
+	}
+
+	// WoW-like feel: early levels are quick, later levels ramp up exponentially.
+	required := baseXP * math.Pow(growth, float64(level-1))
+	if required < 1 {
+		required = 1
+	}
+	return uint64(math.Round(required))
+}
+
+func (p *player) totalXPForLevel(level uint32) uint64 {
+	if level <= 1 {
+		return 0
+	}
+
+	var total uint64
+	for l := uint32(1); l < level; l++ {
+		total += p.experienceForNextLevel(l)
+	}
+	return total
+}
+
+func (p *player) levelForExperience(xp uint64) uint32 {
+	level := uint32(1)
+	for {
+		next := p.totalXPForLevel(level + 1)
+		if xp < next {
+			return level
+		}
+		level++
+
+		// Safety guard for absurd values.
+		if level >= 65535 {
+			return level
+		}
+	}
 }
 
 var handOffset = phy.Vec2f{0.25, 0}

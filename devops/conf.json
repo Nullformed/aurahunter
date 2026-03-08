@@ -20,7 +20,10 @@
       "healthGainSatietyLossTickFraction": 0.0,
       "walkingSpeedPerTick": 0.055,
       "damageAuraRadius": 0.6,
-      "damageAuraDamageFraction": 0.01
+      "damageAuraDamageFraction": 0.01,
+      "damageAuraLevelGainFraction": 0.02,
+      "levelUpXPBase": 25,
+      "levelUpXPGrowthFactor": 1.2
     }
   }
 }

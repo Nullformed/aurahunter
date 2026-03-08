@@ -21,7 +21,7 @@ func (p *player) Update(dt float32) {
 			log.Printf("Non conformant UserData: %T", usr)
 			continue
 		}
-		r.PlayerTouches(p, p.config.DamageAuraDamageFraction)
+		r.PlayerTouches(p, p.DamageAuraDamageFraction())
 	}
 
 	// update time based tings
