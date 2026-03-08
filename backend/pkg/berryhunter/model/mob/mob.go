@@ -31,7 +31,7 @@ var namesEnumDamages = map[string]model.CollisionLayer{
 	"All":       model.LayerPlayerCollision | model.LayerPlaceableCollision,
 }
 
-func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32) *Mob {
+func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32, chaseIntoAuraMargin float32) *Mob {
 	entityType, ok := types[d.Name]
 	if !ok {
 		log.Fatalf("Mob type not found: %d/%s", d.ID, d.Name)
@@ -83,8 +83,12 @@ func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32) *Mob {
 		spawnPosition:    phy.VEC2F_ZERO,
 		spawnInitialized: false,
 		// TODO use walkingSpeedPerTick from global config
-		velocity:      0.055 * d.Factors.Speed,
-		statusEffects: model.NewStatusEffects(),
+		velocity:            0.055 * d.Factors.Speed,
+		chaseIntoAuraMargin: chaseIntoAuraMargin,
+		statusEffects:       model.NewStatusEffects(),
+	}
+	if m.chaseIntoAuraMargin <= 0 {
+		m.chaseIntoAuraMargin = 0.05
 	}
 	m.Body.Shape().UserData = m
 	if rndPos {
@@ -111,8 +115,9 @@ type Mob struct {
 	spawnPosition    phy.Vec2f
 	spawnInitialized bool
 
-	statusEffects    model.StatusEffects
-	deathRewardGiven bool
+	statusEffects       model.StatusEffects
+	deathRewardGiven    bool
+	chaseIntoAuraMargin float32
 }
 
 func (m *Mob) StatusEffects() *model.StatusEffects {
@@ -158,7 +163,9 @@ func (m *Mob) Update(dt float32) bool {
 	}
 
 	if m.aggroTarget != nil {
-		m.moveTowards(m.aggroTarget.Position())
+		if m.shouldApproachAggroTarget() {
+			m.moveTowards(m.aggroTarget.Position())
+		}
 	} else {
 		if m.spawnInitialized {
 			m.moveTowards(m.spawnPosition)
@@ -170,6 +177,20 @@ func (m *Mob) Update(dt float32) bool {
 	}
 
 	return m.health > 0
+}
+
+func (m *Mob) shouldApproachAggroTarget() bool {
+	if m.aggroTarget == nil {
+		return false
+	}
+
+	// Stop once target is already within damage aura, minus a tiny margin.
+	// Include player radius because collision is shape-vs-shape.
+	stopDistance := m.damageAura.Radius + m.aggroTarget.Radius() - m.chaseIntoAuraMargin
+	if stopDistance < 0 {
+		stopDistance = 0
+	}
+	return m.Position().Sub(m.aggroTarget.Position()).Abs() > stopDistance
 }
 
 func (m *Mob) SetPosition(p phy.Vec2f) {

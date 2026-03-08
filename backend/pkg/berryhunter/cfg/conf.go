@@ -22,11 +22,12 @@ type Config struct {
 		ClientKeyFile  string `json:"clientKeyFile"`
 	} `json:"chieftain,omitempty"`
 	Game struct {
-		ColdFractionDayPerS   float32 `json:"coldFractionDayPerSecond"`
-		ColdFractionNightPerS float32 `json:"coldFractionNightPerSecond"`
-		TotalDayCycleSeconds  uint64  `json:"totalDayCycleSeconds"`
-		DayTimeSeconds        uint64  `json:"dayTimeSeconds"`
-		Player                struct {
+		ColdFractionDayPerS    float32 `json:"coldFractionDayPerSecond"`
+		ColdFractionNightPerS  float32 `json:"coldFractionNightPerSecond"`
+		TotalDayCycleSeconds   uint64  `json:"totalDayCycleSeconds"`
+		DayTimeSeconds         uint64  `json:"dayTimeSeconds"`
+		MobChaseIntoAuraMargin float32 `json:"mobChaseIntoAuraMargin"`
+		Player                 struct {
 			FreezingDamageTickFraction       float32 `json:"freezingDamageTickFraction"`
 			StarveDamageTickFraction         float32 `json:"starveDamageTickFraction"`
 			FreezingStarveDamageTickFraction float32 `json:"freezingStarveDamageTickFraction"`

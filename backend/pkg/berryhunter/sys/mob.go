@@ -48,7 +48,7 @@ func (n *MobSystem) Update(dt float32) {
 }
 
 func (n *MobSystem) respawnMob(d *mobs.MobDefinition) {
-	m := mob.NewMob(d, false, n.game.Radius())
+	m := mob.NewMob(d, false, n.game.Radius(), n.game.Config().MobChaseIntoAuraMargin)
 
 	if d.Generator.RespawnBehavior == mobs.RespawnBehaviorProcreation {
 		randomMob := n.randomMob(d.ID)

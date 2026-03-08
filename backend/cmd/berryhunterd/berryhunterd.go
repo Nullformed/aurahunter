@@ -100,7 +100,7 @@ func main() {
 		spawned := make([]model.MobEntity, 0, 70)
 		// add some mobsRegistry
 		for i := 0; i < 70; i++ {
-			m := newRandomMobEntity(mobList, rnd, radius, spawned)
+			m := newRandomMobEntity(mobList, rnd, radius, g.Config().MobChaseIntoAuraMargin, spawned)
 
 			g.AddEntity(m)
 			spawned = append(spawned, m)
@@ -112,7 +112,7 @@ func main() {
 	fixedSpawned := make([]model.MobEntity, 0)
 	for _, md := range mobList {
 		for range md.Generator.Fixed {
-			m := mob.NewMob(md, false, radius)
+			m := mob.NewMob(md, false, radius, g.Config().MobChaseIntoAuraMargin)
 			m.SetPosition(findMobSpawnPosition(radius, m, fixedSpawned))
 			fixedSpawned = append(fixedSpawned, m)
 
@@ -275,7 +275,7 @@ func frontendHandler(fsPath string) http.Handler {
 	return http.FileServer(http.Dir(frontendPath))
 }
 
-func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius float32, existing []model.MobEntity) model.MobEntity {
+func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius float32, chaseIntoAuraMargin float32, existing []model.MobEntity) model.MobEntity {
 	choices := []wrand.Choice{}
 	for _, m := range mobList {
 		choices = append(choices, wrand.Choice{Weight: m.Generator.Weight, Choice: m})
@@ -283,7 +283,7 @@ func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius fl
 	wc := wrand.NewWeightedChoice(choices)
 	selected := wc.Choose(rnd).(*mobs.MobDefinition)
 
-	m := mob.NewMob(selected, false, radius)
+	m := mob.NewMob(selected, false, radius, chaseIntoAuraMargin)
 	m.SetPosition(findMobSpawnPosition(radius, m, existing))
 
 	return m

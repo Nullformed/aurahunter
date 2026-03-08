@@ -9,6 +9,7 @@
     "coldFractionDayPerSecond": 0.005,
     "coldFractionNightPerSecond": 0.04,
     "heatFractionPerSecond": 0.04,
+    "mobChaseIntoAuraMargin": 0.2,
     "player": {
       "freezingDamageTickFraction": 0.001,
       "starveDamageTickFraction": 0.001,
@@ -19,9 +20,9 @@
       "healthGainTick": 0.00033,
       "healthGainSatietyLossTickFraction": 0.0,
       "walkingSpeedPerTick": 0.055,
-      "damageAuraRadius": 0.6,
+      "damageAuraRadius": 1,
       "damageAuraDamageFraction": 0.01,
-      "damageAuraLevelGainFraction": 0.02,
+      "damageAuraLevelGainFraction": 0.001,
       "levelUpXPBase": 150,
       "levelUpXPGrowthFactor": 1.2
     }

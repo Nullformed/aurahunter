@@ -15,6 +15,7 @@ func Config(conf *cfg.Config) Configuration {
 
 		g.TotalDayCycleSeconds = conf.Game.TotalDayCycleSeconds
 		g.DayTimeSeconds = conf.Game.DayTimeSeconds
+		g.MobChaseIntoAuraMargin = conf.Game.MobChaseIntoAuraMargin
 
 		g.PlayerConfig.FreezingDamageTickFraction = conf.Game.Player.FreezingDamageTickFraction
 		g.PlayerConfig.HealthGainSatietyLossTickFraction = conf.Game.Player.HealthGainSatietyLossTickFraction
@@ -44,6 +45,9 @@ func Config(conf *cfg.Config) Configuration {
 		}
 		if g.PlayerConfig.LevelUpXPGrowthFactor <= 1.0 {
 			g.PlayerConfig.LevelUpXPGrowthFactor = 1.2
+		}
+		if g.MobChaseIntoAuraMargin <= 0 {
+			g.MobChaseIntoAuraMargin = 0.2
 		}
 
 		if conf.Chieftain.Addr != "" {
