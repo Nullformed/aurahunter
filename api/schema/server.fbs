@@ -88,6 +88,7 @@ table Mob {
   rotation:float;
 
   aabb:AABB;
+  health:uint;
 
   mob_id:ushort;
 }
@@ -172,4 +173,3 @@ union ServerMessageBody { Welcome, GameState, Accept, Obituary, EntityMessage, S
 table ServerMessage { body:ServerMessageBody; }
 
 root_type ServerMessage;
-

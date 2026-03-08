@@ -1547,8 +1547,16 @@ aabb(obj?:BerryhunterApi.AABB):BerryhunterApi.AABB|null {
 /**
  * @returns {number}
  */
-mobId():number {
+health():number {
   var offset = this.bb!.__offset(this.bb_pos, 18);
+  return offset ? this.bb!.readUint32(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {number}
+ */
+mobId():number {
+  var offset = this.bb!.__offset(this.bb_pos, 20);
   return offset ? this.bb!.readUint16(this.bb_pos + offset) : 0;
 };
 
@@ -1556,7 +1564,7 @@ mobId():number {
  * @param {flatbuffers.Builder} builder
  */
 static startMob(builder:flatbuffers.Builder) {
-  builder.startObject(8);
+  builder.startObject(9);
 };
 
 /**
@@ -1638,10 +1646,18 @@ static addAabb(builder:flatbuffers.Builder, aabbOffset:flatbuffers.Offset) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {number} health
+ */
+static addHealth(builder:flatbuffers.Builder, health:number) {
+  builder.addFieldInt32(7, health, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {number} mobId
  */
 static addMobId(builder:flatbuffers.Builder, mobId:number) {
-  builder.addFieldInt16(7, mobId, 0);
+  builder.addFieldInt16(8, mobId, 0);
 };
 
 /**
