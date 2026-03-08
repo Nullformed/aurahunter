@@ -6,7 +6,7 @@
     "vulnerability": 0.1,
     "damageFraction": 0.0067,
     "structureDamageFraction": 0.67,
-    "speed": 0.1,
+    "speed": 0,
     "deltaPhi": 0.05,
     "turnRate": 0.008
   },
