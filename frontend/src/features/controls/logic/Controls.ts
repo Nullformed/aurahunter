@@ -8,13 +8,12 @@ import {BasicConfig as Constants} from '../../../client-data/BasicConfig';
 import * as Equipment from '../../items/logic/Equipment';
 import * as Console from '../../internal-tools/console/logic/Console';
 import * as Chat from '../../chat/logic/Chat';
-import {isDefined, isUndefined, TwoDimensional} from '../../common/logic/Utils';
+import {isDefined, isUndefined} from '../../common/logic/Utils';
 import Tock from 'tocktimer';
 import {KeyCodes} from '../../input-system/logic/keyboard/keys/KeyCodes';
 import {BerryhunterApi} from '../../backend/logic/BerryhunterApi';
 import {Character} from '../../game-objects/logic/Character';
 import {GameState, IGame} from '../../core/logic/IGame';
-import {radians} from '../../common/logic/Types';
 import {InputAction, InputMessage} from '../../backend/logic/messages/outgoing/InputMessage';
 import {Vector} from '../../core/logic/Vector';
 import {Develop} from '../../internal-tools/develop/logic/_Develop';
@@ -212,7 +211,7 @@ export class Controls {
             } else {
                 if (this.isCraftInProgress()) {
                     // Don't check for actions
-                } else if (this.actionKeys.isDown || inputManager.activePointer.leftButtonDown() || Game.joystickManager.touchActionActive) {
+                } else if (this.actionKeys.isDown) {
                     this.hitAnimationTick = this.character.action();
                     switch (this.character.currentAction) {
                         case 'MAIN':
@@ -287,42 +286,8 @@ export class Controls {
     }
 
     adjustCharacterRotation(face: 'CURSOR' | 'WALKING_DIRECTION', movement: Vector) {
-        if (face === 'WALKING_DIRECTION') {
-            if (movement.x === 0 && movement.y === 0) {
-                return this.character.getRotation();
-            }
-            const rotation: radians = TwoDimensional.angleBetween(
-                movement.x,
-                movement.y,
-                0,
-                0,
-            );
-
-            this.character.setRotation(rotation);
-
-            return rotation;
-        }
-
-        if (face === 'CURSOR') {
-            if (isDefined(Game.player)) {
-                const pointer = Game.inputManager.activePointer;
-                let characterX = Game.player.camera.getScreenX(this.character.getX());
-                let characterY = Game.player.camera.getScreenY(this.character.getY());
-
-                const rotation: radians = TwoDimensional.angleBetween(
-                    pointer.x,
-                    pointer.y,
-                    characterX,
-                    characterY,
-                );
-
-                this.character.setRotation(rotation);
-
-                return rotation;
-            }
-
-            return this.character.shape.rotation;
-        }
+        // Rotation input is disabled.
+        return this.character.getRotation();
     }
 
     destroy() {

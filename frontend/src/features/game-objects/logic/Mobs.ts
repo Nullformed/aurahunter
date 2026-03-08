@@ -87,8 +87,8 @@ export abstract class Mob extends GameObject {
             return;
         }
 
-        // Subtract the default rotation offset of all animal graphics
-        super.setRotation(rotation + Math.PI / 2);
+        // Keep all mob graphics facing down at default backend angle.
+        super.setRotation(rotation);
     }
 
     getRotationShape(): PIXI.Container {

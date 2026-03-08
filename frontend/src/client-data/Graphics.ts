@@ -86,7 +86,7 @@ export const GraphicsConfig = {
             file: require('../features/game-objects/assets/mobs/dodo.svg'),
             minSize: <number> 35,
             maxSize: <number> 45,
-            damageAuraRadiusMeters: <number> 0,
+            damageAuraRadiusMeters: <number> 0.6,
         },
 
         saberToothCat: {

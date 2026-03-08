@@ -111,8 +111,8 @@ export class Character extends GameObject implements ICharacterLike, IMiniMapRen
             equipmentSlot.originalTranslation = Vector.clone(equipmentSlot.position);
         });
 
-        // Rotate the character according the 0-angle in drawing space
-        this.setRotation(Math.PI / -2);
+        // Keep a fixed default facing (down) until explicit rotation is applied.
+        this.setRotation(Math.PI / 2);
 
         this.createName();
 

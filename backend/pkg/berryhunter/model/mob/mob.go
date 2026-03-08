@@ -66,7 +66,7 @@ func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32) *Mob {
 	m := &Mob{
 		BaseEntity:         base,
 		rand:               rnd,
-		heading:            phy.Vec2f{1, 0},
+		heading:            phy.Vec2f{-1, 0},
 		health:             vitals.Max,
 		definition:         d,
 		damageAura:         damageAura,
@@ -79,7 +79,7 @@ func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32) *Mob {
 	m.Body.Shape().UserData = m
 	if rndPos {
 		m.SetPosition(gen.NewRandomPos(radius))
-		m.SetAngle(rnd.Float32() * 2 * math.Pi)
+		m.SetAngle(0)
 	}
 	return m
 }
@@ -144,10 +144,12 @@ func (m *Mob) Update(dt float32) bool {
 	// - add 'horizon' circle
 	// - calculate collision response on 'horizon' circle and use as 'desired' heading
 
-	// wandering
-	m.heading, m.wanderAcceleration = wander(m.heading, m.wanderAcceleration, m.wanderDeltaPhi, m.rand)
-	pos := m.Position().Add(m.heading.Mult(m.velocity))
-	m.SetPosition(pos)
+	// Only wander when the configured velocity is > 0.
+	if m.velocity > 0 {
+		m.heading, m.wanderAcceleration = wander(m.heading, m.wanderAcceleration, m.wanderDeltaPhi, m.rand)
+		pos := m.Position().Add(m.heading.Mult(m.velocity))
+		m.SetPosition(pos)
+	}
 
 	return m.health > 0
 }

@@ -86,8 +86,6 @@ func (i *PlayerInputSystem) updateInput(p model.PlayerEntity, next, last *model.
 		return
 	}
 
-	p.SetAngle(next.Rotation)
-
 	// do we even have inputs?
 	if next.Movement != nil {
 		// we can only move if we are still alive!

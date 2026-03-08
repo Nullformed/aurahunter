@@ -2,7 +2,6 @@ package sys
 
 import (
 	"log"
-	"math"
 	"math/rand"
 
 	"github.com/EngoEngine/ecs"
@@ -57,7 +56,7 @@ func (n *MobSystem) respawnMob(d *mobs.MobDefinition) {
 			m.SetAngle(randomMob.Angle())
 		} else {
 			m.SetPosition(gen.NewRandomPos(n.game.Radius()))
-			m.SetAngle(n.rnd.Float32() * 2 * math.Pi)
+			m.SetAngle(0)
 		}
 	}
 
