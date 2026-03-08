@@ -171,6 +171,10 @@ func (r *Resource) MobTouches(e model.MobEntity, factors mobs.Factors) {
 	// Nothing yet
 }
 
+func (r *Resource) PlayerTouches(p model.PlayerEntity, damageFraction float32) {
+	// Nothing yet
+}
+
 func (r *Resource) NeedsRespawn() bool {
 	return r.stock.Available == 0 && r.resource.Generator.OnDepletion == items.DepletionBehaviorRespawn
 }

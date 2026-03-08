@@ -25,6 +25,14 @@ func Config(conf *cfg.Config) Configuration {
 		g.PlayerConfig.StarveDamageTickFraction = conf.Game.Player.StarveDamageTickFraction
 		g.PlayerConfig.FreezingStarveDamageTickFraction = conf.Game.Player.FreezingStarveDamageTickFraction
 		g.PlayerConfig.WalkingSpeedPerTick = conf.Game.Player.WalkingSpeedPerTick
+		g.PlayerConfig.DamageAuraRadius = conf.Game.Player.DamageAuraRadius
+		g.PlayerConfig.DamageAuraDamageFraction = conf.Game.Player.DamageAuraDamageFraction
+		if g.PlayerConfig.DamageAuraRadius <= 0 {
+			g.PlayerConfig.DamageAuraRadius = 0.6
+		}
+		if g.PlayerConfig.DamageAuraDamageFraction <= 0 {
+			g.PlayerConfig.DamageAuraDamageFraction = 0.00167
+		}
 
 		if conf.Chieftain.Addr != "" {
 			ctn := &cfg.ChieftainConfig{}

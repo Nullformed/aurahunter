@@ -222,3 +222,9 @@ func (m *Mob) MobTouches(e model.MobEntity, factors mobs.Factors) {
 
 	m.takeDamage(factors.DamageFraction, model.StatusEffectDamagedAmbient)
 }
+
+func (m *Mob) PlayerTouches(p model.PlayerEntity, damageFraction float32) {
+	log.Printf("👉")
+
+	m.takeDamage(damageFraction, model.StatusEffectDamagedAmbient)
+}

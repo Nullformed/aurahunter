@@ -29,6 +29,8 @@ export const GraphicsConfig = {
          */
         size: <number> 30,
         files: requireAll(require.context('../features/game-objects/assets/characters', false, /\.svg$/)),
+        damageAuraFile: require('../features/game-objects/assets/effects/damageAura.svg'),
+        damageAuraRadiusMeters: <number> 0.6,
 
         hands: {
             fillColor: <color> 0xf2a586,
@@ -70,6 +72,7 @@ export const GraphicsConfig = {
                 file: string,
                 minSize: number,
                 maxSize: number,
+                damageAuraRadiusMeters?: number,
                 anchor?: {x: number, y: number}
             }
     }>{
@@ -77,18 +80,21 @@ export const GraphicsConfig = {
             file: require('../features/game-objects/assets/mobs/dodo.svg'),
             minSize: <number> 35,
             maxSize: <number> 45,
+            damageAuraRadiusMeters: <number> 0,
         },
 
         saberToothCat: {
-            file: require('../features/game-objects/assets/mobs/saberToothCat.svg'),
+            file: require('../features/game-objects/assets/mobs/lion-svgrepo-com.svg'),
             minSize: <number> 45,
             maxSize: <number> 60,
+            damageAuraRadiusMeters: <number> 0.46,
         },
 
         mammoth: {
             file: require('../features/game-objects/assets/mobs/mammoth.svg'),
             minSize: <number> 85,
             maxSize: <number> 100,
+            damageAuraRadiusMeters: <number> 0.65,
             anchor: {x: 0.5, y: 0.4},
         },
 
@@ -96,6 +102,7 @@ export const GraphicsConfig = {
             file: require('../features/game-objects/assets/mobs/angryMammoth.svg'),
             minSize: <number> 340,
             maxSize: <number> 340,
+            damageAuraRadiusMeters: <number> 2.1,
             anchor: {x: 0.5, y: 0.4},
         },
     },

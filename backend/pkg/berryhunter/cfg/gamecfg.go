@@ -62,4 +62,7 @@ type PlayerConfig struct {
 	HealthGainSatietyLossTickFraction float32
 
 	WalkingSpeedPerTick float32
+
+	DamageAuraRadius         float32
+	DamageAuraDamageFraction float32
 }
