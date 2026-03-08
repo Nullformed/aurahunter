@@ -40,7 +40,7 @@ func Config(conf *cfg.Config) Configuration {
 			g.PlayerConfig.DamageAuraLevelGainFraction = 0.01
 		}
 		if g.PlayerConfig.LevelUpXPBase == 0 {
-			g.PlayerConfig.LevelUpXPBase = 25
+			g.PlayerConfig.LevelUpXPBase = 150
 		}
 		if g.PlayerConfig.LevelUpXPGrowthFactor <= 1.0 {
 			g.PlayerConfig.LevelUpXPGrowthFactor = 1.2
