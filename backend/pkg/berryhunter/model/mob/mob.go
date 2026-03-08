@@ -3,7 +3,6 @@ package mob
 import (
 	"fmt"
 	"log"
-	"math"
 	"math/rand"
 
 	"github.com/trichner/berryhunter/pkg/api/BerryhunterApi"
@@ -11,6 +10,7 @@ import (
 	"github.com/trichner/berryhunter/pkg/berryhunter/items"
 	"github.com/trichner/berryhunter/pkg/berryhunter/items/mobs"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model"
+	"github.com/trichner/berryhunter/pkg/berryhunter/model/constant"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model/vitals"
 	"github.com/trichner/berryhunter/pkg/berryhunter/phy"
 )
@@ -61,17 +61,27 @@ func NewMob(d *mobs.MobDefinition, rndPos bool, radius float32) *Mob {
 	damageAura.Shape().Mask = int(damageAuraMask)
 	damageAura.Shape().IsSensor = true
 
+	aggroRadius := d.Body.AggroRadius
+	if aggroRadius <= 0 {
+		aggroRadius = d.Body.DamageRadius * 4
+	}
+	aggroAura := phy.NewCircle(phy.VEC2F_ZERO, aggroRadius)
+	aggroAura.Shape().Layer = int(model.LayerNoneCollision)
+	aggroAura.Shape().Mask = int(model.LayerPlayerCollision)
+	aggroAura.Shape().IsSensor = true
+
 	base := model.NewBaseEntity(mobBody, entityType)
 	rnd := rand.New(rand.NewSource(int64(base.Basic().ID())))
 	m := &Mob{
-		BaseEntity:         base,
-		rand:               rnd,
-		heading:            phy.Vec2f{-1, 0},
-		health:             vitals.Max,
-		definition:         d,
-		damageAura:         damageAura,
-		wanderAcceleration: phy.Vec2f{d.Factors.TurnRate, 0},
-		wanderDeltaPhi:     2 * math.Pi * d.Factors.DeltaPhi,
+		BaseEntity:       base,
+		rand:             rnd,
+		heading:          phy.Vec2f{-1, 0},
+		health:           vitals.Max,
+		definition:       d,
+		damageAura:       damageAura,
+		aggroAura:        aggroAura,
+		spawnPosition:    phy.VEC2F_ZERO,
+		spawnInitialized: false,
 		// TODO use walkingSpeedPerTick from global config
 		velocity:      0.055 * d.Factors.Speed,
 		statusEffects: model.NewStatusEffects(),
@@ -94,11 +104,12 @@ type Mob struct {
 	rand    *rand.Rand
 
 	damageAura *phy.Circle
+	aggroAura  *phy.Circle
 
-	// wandering
-	wanderAcceleration phy.Vec2f
-	wanderDeltaPhi     float32
-	velocity           float32
+	velocity         float32
+	aggroTarget      model.PlayerEntity
+	spawnPosition    phy.Vec2f
+	spawnInitialized bool
 
 	statusEffects model.StatusEffects
 }
@@ -109,7 +120,7 @@ func (m *Mob) StatusEffects() *model.StatusEffects {
 
 func (m *Mob) Bodies() model.Bodies {
 	b := m.BaseEntity.Bodies()
-	return append(b, m.damageAura)
+	return append(b, m.damageAura, m.aggroAura)
 }
 
 func (m *Mob) MobID() mobs.MobID {
@@ -137,45 +148,35 @@ func (m *Mob) Update(dt float32) bool {
 		r.MobTouches(m, m.definition.Factors)
 	}
 
-	// TODO:
-	// A: Wandering
-	// - http://natureofcode.com/book/chapter-6-autonomous-agents/
-	// B: Environment Awareness
-	// - add 'horizon' circle
-	// - calculate collision response on 'horizon' circle and use as 'desired' heading
+	if m.aggroTarget == nil {
+		m.aggroTarget = m.findAggroTarget()
+	}
 
-	// Only wander when the configured velocity is > 0.
-	if m.velocity > 0 {
-		m.heading, m.wanderAcceleration = wander(m.heading, m.wanderAcceleration, m.wanderDeltaPhi, m.rand)
-		pos := m.Position().Add(m.heading.Mult(m.velocity))
-		m.SetPosition(pos)
+	if m.aggroTarget != nil && m.shouldLoseAggro() {
+		m.aggroTarget = nil
+	}
+
+	if m.aggroTarget != nil {
+		m.moveTowards(m.aggroTarget.Position())
+	} else {
+		if m.spawnInitialized {
+			m.moveTowards(m.spawnPosition)
+		}
+		// Heal to full in ~2 seconds while out of combat.
+		if m.health < vitals.Max {
+			m.health = m.health.AddFraction(1.0 / (2 * constant.TicksPerSecond))
+		}
 	}
 
 	return m.health > 0
 }
 
-// http://natureofcode.com/book/chapter-6-autonomous-agents/
-//
-//	      heading * wanderDistance
-//	  D ----------------->
-//						   / acceleration
-//	                   v
-func wander(heading, acceleration phy.Vec2f, deltaPhi float32, r *rand.Rand) (newHeading, newAcceleration phy.Vec2f) {
-	const wanderDistance float32 = 1
-
-	wanderHeading := heading.Normalize().Mult(wanderDistance)
-
-	// rotate wanderAcceleration by a random angle
-	phi := (r.Float32()*2 - 1) * deltaPhi
-	rMat := phy.NewRotMat2f(phi)
-	acceleration = rMat.Mult(acceleration)
-
-	// update the heading
-	h := wanderHeading.Add(acceleration).Normalize()
-	return h.Normalize(), acceleration
-}
-
 func (m *Mob) SetPosition(p phy.Vec2f) {
+	if !m.spawnInitialized {
+		m.spawnPosition = p
+		m.spawnInitialized = true
+		m.aggroAura.SetPosition(p)
+	}
 	m.Body.SetPosition(p)
 	m.damageAura.SetPosition(p)
 }
@@ -188,6 +189,61 @@ func (m *Mob) Angle() float32 {
 
 func (m *Mob) SetAngle(a float32) {
 	m.heading = phy.NewRotMat2f(a).Mult(phy.Vec2f{-1, 0})
+}
+
+func (m *Mob) moveTowards(target phy.Vec2f) {
+	if m.velocity <= 0 {
+		return
+	}
+
+	current := m.Position()
+	delta := target.Sub(current)
+	distance := delta.Abs()
+	if distance < 1e-4 {
+		return
+	}
+
+	step := m.velocity
+	if distance < step {
+		step = distance
+	}
+
+	next := current.Add(delta.Div(distance).Mult(step))
+	m.SetPosition(next)
+}
+
+func (m *Mob) findAggroTarget() model.PlayerEntity {
+	var nearest model.PlayerEntity
+	bestDistance := float32(0)
+
+	for c := range m.aggroAura.Collisions() {
+		usr := c.Shape().UserData
+		p, ok := usr.(model.PlayerEntity)
+		if !ok {
+			continue
+		}
+		if p.VitalSigns().Health == 0 {
+			continue
+		}
+		d := p.Position().Sub(m.Position()).AbsSq()
+		if nearest == nil || d < bestDistance {
+			nearest = p
+			bestDistance = d
+		}
+	}
+
+	return nearest
+}
+
+func (m *Mob) shouldLoseAggro() bool {
+	if m.aggroTarget == nil || !m.spawnInitialized {
+		return true
+	}
+	if m.aggroTarget.VitalSigns().Health == 0 {
+		return true
+	}
+	// Lose aggro only after the mob itself has left its fixed aggro territory.
+	return m.Position().Sub(m.spawnPosition).Abs() > m.aggroAura.Radius
 }
 
 func (m *Mob) Health() vitals.VitalSign {

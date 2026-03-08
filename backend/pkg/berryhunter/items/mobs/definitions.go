@@ -38,6 +38,7 @@ type Body struct {
 	CollisionLayer int
 	CollisionMask  int
 	DamageRadius   float32
+	AggroRadius    float32
 	Damages        string
 }
 
@@ -95,6 +96,7 @@ type mobDefinition struct {
 		CollisionLayer int     `json:"collisionLayer"`
 		CollisionMask  int     `json:"collisionMask"`
 		DamageRadius   float32 `json:"damageRadius"`
+		AggroRadius    float32 `json:"aggroRadius"`
 		Damages        string  `json:"damages"`
 	} `json:"body"`
 
@@ -141,6 +143,7 @@ func (m *mobDefinition) mapToMobDefinition(r items.Registry) (*MobDefinition, er
 			CollisionLayer: m.Body.CollisionLayer,
 			CollisionMask:  m.Body.CollisionMask,
 			DamageRadius:   m.Body.DamageRadius,
+			AggroRadius:    m.Body.AggroRadius,
 			Damages:        m.Body.Damages,
 		},
 		Generator: Generator{

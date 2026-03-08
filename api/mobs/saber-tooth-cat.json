@@ -5,7 +5,7 @@
   "factors": {
     "vulnerability": 0.833,
     "damageFraction": 0.004,
-    "speed": 0,
+    "speed": 0.5,
     "deltaPhi": 0.1,
     "turnRate": 0.1
   },
@@ -17,7 +17,8 @@
   ],
   "body": {
     "radius": 0.35,
-    "damageRadius": 1
+    "damageRadius": 1,
+    "aggroRadius": 4
   },
   "generator": {
     "weight": 15
