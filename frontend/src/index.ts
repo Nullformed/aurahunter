@@ -22,7 +22,8 @@ import './features/items/logic/InventoryShortcuts';
 import './features/items/logic/InventorySlot';
 import './features/items/logic/Items';
 import './features/scoreboard/logic/HighScores';
-import './features/tutorial/logic/Tutorial';
+// Tutorial temporarily disabled.
+// import './features/tutorial/logic/Tutorial';
 import './features/user-interface/logic/UserInterface';
 import './features/user-interface/HUD/logic/ClickableIcon';
 import './features/user-interface/changelog/logic/Changelog';
