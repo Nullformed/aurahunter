@@ -10,6 +10,7 @@ import (
 	"github.com/trichner/berryhunter/pkg/berryhunter/items/mobs"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model/mob"
+	"github.com/trichner/berryhunter/pkg/berryhunter/phy"
 	"github.com/trichner/berryhunter/pkg/berryhunter/wrand"
 )
 
@@ -47,20 +48,97 @@ func (n *MobSystem) Update(dt float32) {
 }
 
 func (n *MobSystem) respawnMob(d *mobs.MobDefinition) {
-	m := mob.NewMob(d, d.Generator.RespawnBehavior == mobs.RespawnBehaviorRandomLocation, n.game.Radius())
+	m := mob.NewMob(d, false, n.game.Radius())
 
 	if d.Generator.RespawnBehavior == mobs.RespawnBehaviorProcreation {
 		randomMob := n.randomMob(d.ID)
 		if randomMob != nil {
-			m.SetPosition(randomMob.Position())
+			m.SetPosition(n.findNearbySpawnPosition(randomMob.Position(), m, n.mobs))
 			m.SetAngle(randomMob.Angle())
 		} else {
-			m.SetPosition(gen.NewRandomPos(n.game.Radius()))
+			m.SetPosition(n.findMobSpawnPosition(m, n.mobs))
 			m.SetAngle(0)
 		}
+	} else {
+		m.SetPosition(n.findMobSpawnPosition(m, n.mobs))
+		m.SetAngle(0)
 	}
 
 	n.game.AddEntity(m)
+}
+
+func (n *MobSystem) findMobSpawnPosition(spawned model.MobEntity, existing []model.MobEntity) phy.Vec2f {
+	const maxTries = 64
+	const minDistancePadding = 0.05
+
+	best := gen.NewRandomPos(n.game.Radius())
+	bestPenalty := float32(1e9)
+
+	for i := 0; i < maxTries; i++ {
+		candidate := gen.NewRandomPos(n.game.Radius())
+		penalty := float32(0)
+		isOverlapping := false
+		for _, other := range existing {
+			needed := spawned.Radius() + other.Radius() + minDistancePadding
+			d2 := candidate.Sub(other.Position()).AbsSq()
+			if d2 < needed*needed {
+				isOverlapping = true
+				penalty += needed*needed - d2
+			}
+		}
+		if !isOverlapping {
+			return candidate
+		}
+		if penalty < bestPenalty {
+			best = candidate
+			bestPenalty = penalty
+		}
+	}
+	return best
+}
+
+func (n *MobSystem) findNearbySpawnPosition(center phy.Vec2f, spawned model.MobEntity, existing []model.MobEntity) phy.Vec2f {
+	const maxTries = 64
+	const minDistancePadding = 0.05
+	const nearMin = 0.35
+	const nearMax = 1.2
+
+	best := center
+	bestPenalty := float32(1e9)
+	worldRadius2 := n.game.Radius() * n.game.Radius()
+
+	for i := 0; i < maxTries; i++ {
+		angle := n.rnd.Float32() * 2 * 3.1415927
+		dist := nearMin + n.rnd.Float32()*(nearMax-nearMin)
+		offset := phy.NewPolarVec2f(dist, angle)
+		candidate := center.Add(offset)
+		if candidate.AbsSq() > worldRadius2 {
+			continue
+		}
+
+		penalty := float32(0)
+		isOverlapping := false
+		for _, other := range existing {
+			needed := spawned.Radius() + other.Radius() + minDistancePadding
+			d2 := candidate.Sub(other.Position()).AbsSq()
+			if d2 < needed*needed {
+				isOverlapping = true
+				penalty += needed*needed - d2
+			}
+		}
+		if !isOverlapping {
+			return candidate
+		}
+		if penalty < bestPenalty {
+			best = candidate
+			bestPenalty = penalty
+		}
+	}
+
+	if bestPenalty < float32(1e9) {
+		return best
+	}
+	return n.findMobSpawnPosition(spawned, existing)
 }
 
 func (n *MobSystem) randomMob(id mobs.MobID) model.MobEntity {

@@ -16,6 +16,7 @@ import (
 	"github.com/trichner/berryhunter/pkg/berryhunter/items/mobs"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model"
 	"github.com/trichner/berryhunter/pkg/berryhunter/model/mob"
+	"github.com/trichner/berryhunter/pkg/berryhunter/phy"
 	"github.com/trichner/berryhunter/pkg/berryhunter/wrand"
 	"github.com/trichner/berryhunter/pkg/logging"
 	"golang.org/x/crypto/acme/autocert"
@@ -96,19 +97,24 @@ func main() {
 	spawnedMobs := make(map[string]int)
 
 	if len(mobList) > 0 {
+		spawned := make([]model.MobEntity, 0, 70)
 		// add some mobsRegistry
 		for i := 0; i < 70; i++ {
-			m := newRandomMobEntity(mobList, rnd, radius)
+			m := newRandomMobEntity(mobList, rnd, radius, spawned)
 
 			g.AddEntity(m)
+			spawned = append(spawned, m)
 
 			spawnedMobs[m.MobDefinition().Name]++
 		}
 	}
 
+	fixedSpawned := make([]model.MobEntity, 0)
 	for _, md := range mobList {
 		for range md.Generator.Fixed {
-			m := mob.NewMob(md, true, radius)
+			m := mob.NewMob(md, false, radius)
+			m.SetPosition(findMobSpawnPosition(radius, m, fixedSpawned))
+			fixedSpawned = append(fixedSpawned, m)
 
 			g.AddEntity(m)
 
@@ -269,7 +275,7 @@ func frontendHandler(fsPath string) http.Handler {
 	return http.FileServer(http.Dir(frontendPath))
 }
 
-func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius float32) model.MobEntity {
+func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius float32, existing []model.MobEntity) model.MobEntity {
 	choices := []wrand.Choice{}
 	for _, m := range mobList {
 		choices = append(choices, wrand.Choice{Weight: m.Generator.Weight, Choice: m})
@@ -277,7 +283,40 @@ func newRandomMobEntity(mobList []*mobs.MobDefinition, rnd *rand.Rand, radius fl
 	wc := wrand.NewWeightedChoice(choices)
 	selected := wc.Choose(rnd).(*mobs.MobDefinition)
 
-	m := mob.NewMob(selected, true, radius)
+	m := mob.NewMob(selected, false, radius)
+	m.SetPosition(findMobSpawnPosition(radius, m, existing))
 
 	return m
+}
+
+func findMobSpawnPosition(worldRadius float32, spawned model.MobEntity, existing []model.MobEntity) phy.Vec2f {
+	const maxTries = 64
+	const minDistancePadding = 0.05
+
+	best := gen.NewRandomPos(worldRadius)
+	bestPenalty := float32(1e9)
+
+	for i := 0; i < maxTries; i++ {
+		candidate := gen.NewRandomPos(worldRadius)
+		penalty := float32(0)
+		isOverlapping := false
+		for _, other := range existing {
+			needed := spawned.Radius() + other.Radius() + minDistancePadding
+			d2 := candidate.Sub(other.Position()).AbsSq()
+			if d2 < needed*needed {
+				isOverlapping = true
+				penalty += needed*needed - d2
+			}
+		}
+		if !isOverlapping {
+			return candidate
+		}
+		if penalty < bestPenalty {
+			best = candidate
+			bestPenalty = penalty
+		}
+	}
+
+	// fallback: least-overlapping sampled candidate
+	return best
 }
