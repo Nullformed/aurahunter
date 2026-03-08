@@ -53,7 +53,7 @@ export class Controls {
     downKeys = new Keys(KeyCodes.S, KeyCodes.DOWN);
     leftKeys = new Keys(KeyCodes.A, KeyCodes.LEFT);
     rightKeys = new Keys(KeyCodes.D, KeyCodes.RIGHT);
-    actionKeys = new Keys(KeyCodes.E, KeyCodes.SPACE);
+    actionKeys = new Keys();
     altActionKeys = new Keys(KeyCodes.Q, KeyCodes.SHIFT);
     pauseKeys = new Keys(KeyCodes.P);
     hitAnimationTick: number = 0;
