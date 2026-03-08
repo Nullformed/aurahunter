@@ -4,7 +4,7 @@
   "type": "MOB",
   "factors": {
     "vulnerability": 0.833,
-    "damageFraction": 0.0067,
+    "damageFraction": 0.004,
     "speed": 0,
     "deltaPhi": 0.1,
     "turnRate": 0.1
@@ -17,7 +17,7 @@
   ],
   "body": {
     "radius": 0.35,
-    "damageRadius": 0.46
+    "damageRadius": 1
   },
   "generator": {
     "weight": 15
