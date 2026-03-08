@@ -53,7 +53,12 @@ export abstract class Mob extends GameObject {
         super(id, gameLayer, x, y, size, 0, svg, anchor);
         if (damageAuraRadiusMeters > 0) {
             this.shape.addChildAt(
-                createInjectedSVG(Mob.damageAura.svg, 0, 0, meter2px(damageAuraRadiusMeters)),
+                createInjectedSVG(
+                    Mob.damageAura.svg,
+                    0,
+                    0,
+                    meter2px(damageAuraRadiusMeters + GraphicsConfig.character.colliderRadiusMeters),
+                ),
                 0,
             );
         }
@@ -199,4 +204,11 @@ export class AngryMammoth extends Mob {
 Preloading.registerGameObjectSVG(AngryMammoth, file('angryMammoth'), maxSize('angryMammoth'));
 
 // noinspection JSIgnoredPromiseFromCall
-Preloading.registerGameObjectSVG(Mob.damageAura, GraphicsConfig.character.damageAuraFile, meter2px(2.1));
+Preloading.registerGameObjectSVG(
+    Mob.damageAura,
+    GraphicsConfig.character.damageAuraFile,
+    meter2px(
+        Math.max(...Object.values(GraphicsConfig.mobs).map((mob) => mob.damageAuraRadiusMeters || 0)) +
+        GraphicsConfig.character.colliderRadiusMeters,
+    ),
+);
